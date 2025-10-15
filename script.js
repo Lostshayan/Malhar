@@ -132,7 +132,7 @@ async function displayAlbums() {
   Array.from(document.getElementsByClassName("card")).forEach(e => {
     e.addEventListener("click", async item => {
       songs = await getSongs(item.currentTarget.dataset.folder);
-      playMusic(songs[0], true); // load first song but do NOT auto-play
+      playMusic(songs[0]); // load first song but do NOT auto-play
     });
   });
 }
@@ -223,5 +223,6 @@ async function main() {
     document.querySelector(".songtime").innerHTML = "00:00 / 00:00";
   });
 }
+
 
 main();
