@@ -5,7 +5,7 @@ let songs = [];
 let currFolder = "";
 
 // ----------------------
-// 🎧 Playlists (Edit these)
+// 🎧 Playlists
 // ----------------------
 const playlists = {
   "favs": [
@@ -128,11 +128,11 @@ async function displayAlbums() {
       </div>`;
   });
 
-  // 🖱 Click on a playlist card to load songs (no auto-play)
+  // 🖱 Click on a playlist card to load songs
   Array.from(document.getElementsByClassName("card")).forEach(e => {
     e.addEventListener("click", async item => {
       songs = await getSongs(item.currentTarget.dataset.folder);
-      playMusic(songs[0], true); // load first song but do NOT auto-play
+      playMusic(songs[0], true); // load first song but do NOT autoplay
     });
   });
 }
@@ -179,16 +179,22 @@ async function main() {
     document.querySelector(".left").style.left = "-120%";
   });
 
-  // ⏮ Previous
+  // ⏮ Previous (FIXED)
   previous.addEventListener("click", () => {
-    let index = songs.indexOf(currentSong.src.split("/").pop());
-    if (index > 0) playMusic(songs[index - 1]);
+    let currentFile = decodeURIComponent(currentSong.src.split("/").pop());
+    let index = songs.findIndex(s => s === currentFile);
+    if (index > 0) {
+      playMusic(songs[index - 1]);
+    }
   });
 
-  // ⏭ Next
+  // ⏭ Next (FIXED)
   next.addEventListener("click", () => {
-    let index = songs.indexOf(currentSong.src.split("/").pop());
-    if (index + 1 < songs.length) playMusic(songs[index + 1]);
+    let currentFile = decodeURIComponent(currentSong.src.split("/").pop());
+    let index = songs.findIndex(s => s === currentFile);
+    if (index + 1 < songs.length) {
+      playMusic(songs[index + 1]);
+    }
   });
 
   // 🔊 Volume control
