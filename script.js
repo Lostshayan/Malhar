@@ -9,26 +9,23 @@ let currFolder = "favs"; // default playlist folder
 // 🎧 Playlists
 // ----------------------
 const playlists = {
-  "favs": [
+  favs: [
     "Kolaveri - Dhanush.mp3",
     "Apna Bana Le - Arjit Singh.mp3",
     "Phir - Rekha.mp3",
-    "ronthon - Shayan.mp3"
+    "ronthon - Shayan.mp3",
   ],
-  "hindi": [
-    "Meri Banogi Kya - Rito Rabha.mp3",
-    "Satranga - Arjit Singh.mp3"
-  ],
-  "english": [
+  hindi: ["Meri Banogi Kya - Rito Rabha.mp3", "Satranga - Arjit Singh.mp3"],
+  english: [
     "Shape of You - Ed Sheeran.mp3",
     "Car's Outside - James Arthur.mp3",
     "Golden Hour - JVKE.mp3",
-    "Those Eyes - New West.mp3"
+    "Those Eyes - New West.mp3",
   ],
-  "bangla": [
+  bangla: [
     "Jiya Tui Chara - Arjit Singh.mp3",
-    "Beche Thakar Gaan - Anupam Roy.mp3"
-  ]
+    "Beche Thakar Gaan - Anupam Roy.mp3",
+  ],
 };
 
 // ----------------------
@@ -38,7 +35,9 @@ function secondsToMinutesSeconds(seconds) {
   if (isNaN(seconds) || seconds < 0) return "00:00";
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
-  return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+  return `${String(minutes).padStart(2, "0")}:${String(
+    remainingSeconds
+  ).padStart(2, "0")}`;
 }
 
 // ----------------------
@@ -49,7 +48,7 @@ function playMusic(track, autoplay = true) {
   let cleanName = track.replace(".mp3", "");
   document.querySelector(".songinfo").innerHTML = cleanName;
   if (autoplay) {
-    currentSong.play().catch(e => console.log("Playback error:", e));
+    currentSong.play().catch((e) => console.log("Playback error:", e));
     document.getElementById("play").src = "./img/pause.svg";
   } else {
     document.getElementById("play").src = "./img/play.svg";
@@ -63,7 +62,7 @@ function displayAlbums() {
   const cardContainer = document.querySelector(".cardContainer");
   cardContainer.innerHTML = "";
 
-  Object.keys(playlists).forEach(folder => {
+  Object.keys(playlists).forEach((folder) => {
     cardContainer.innerHTML += `
       <div data-folder="${folder}" class="card">
         <div class="play">
@@ -162,28 +161,36 @@ function main() {
   // ⏱ Update time & progress
   currentSong.addEventListener("timeupdate", () => {
     const duration = currentSong.duration || 0;
-    document.querySelector(".songtime").innerHTML =
-      `${secondsToMinutesSeconds(currentSong.currentTime)} / ${secondsToMinutesSeconds(duration)}`;
+    document.querySelector(".songtime").innerHTML = `${secondsToMinutesSeconds(
+      currentSong.currentTime
+    )} / ${secondsToMinutesSeconds(duration)}`;
     document.querySelector(".circle").style.left =
       (currentSong.currentTime / duration) * 100 + "%";
   });
 
+  // 🔁 Autoplay next song when current song ends
+  currentSong.addEventListener("ended", () => {
+    if (songs.length === 0) return;
+    currentIndex = (currentIndex + 1) % songs.length; // loop back to first song
+    playMusic(songs[currentIndex]);
+  });
+
   // 🎚 Seekbar
-  document.querySelector(".seekbar").addEventListener("click", e => {
-    let percent = (e.offsetX / e.target.getBoundingClientRect().width);
+  document.querySelector(".seekbar").addEventListener("click", (e) => {
+    let percent = e.offsetX / e.target.getBoundingClientRect().width;
     currentSong.currentTime = currentSong.duration * percent;
     document.querySelector(".circle").style.left = percent * 100 + "%";
   });
 
   // 🔊 Volume control
-  document.querySelector(".range input").addEventListener("input", e => {
+  document.querySelector(".range input").addEventListener("input", (e) => {
     currentSong.volume = e.target.value / 100;
     document.querySelector(".volume>img").src =
       currentSong.volume > 0 ? "img/volume.svg" : "img/mute.svg";
   });
 
   // 🔇 Mute toggle
-  document.querySelector(".volume>img").addEventListener("click", e => {
+  document.querySelector(".volume>img").addEventListener("click", (e) => {
     if (e.target.src.includes("volume.svg")) {
       e.target.src = "img/mute.svg";
       currentSong.volume = 0;
