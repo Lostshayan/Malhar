@@ -209,6 +209,14 @@ function main() {
   document.querySelector(".close").addEventListener("click", () => {
     document.querySelector(".left").style.left = "-120%";
   });
+
+  document.querySelector(".loginbtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    currFolder = "favs";
+    const songToPlay = "ronthon - Shayan.mp3";
+    currentIndex = playlists[currFolder].indexOf(songToPlay);
+    playMusic(songToPlay);
+  });
 }
 
 main();
