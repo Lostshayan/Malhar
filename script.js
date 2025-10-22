@@ -4,8 +4,6 @@ let currentSong = new Audio();
 let songs = [];
 let currentIndex = 0;
 let currFolder = "favs"; // default playlist folder
-let lastPlayed = { folder: "", index: 0, song: "" }; // store previous song
-let isSpecialSong = false; // check if 'ronthon' is playing
 
 // ----------------------
 // 🎧 Playlists
@@ -49,7 +47,6 @@ function playMusic(track, autoplay = true) {
   currentSong.src = `songs/${currFolder}/${track}`;
   let cleanName = track.replace(".mp3", "");
   document.querySelector(".songinfo").innerHTML = cleanName;
-
   if (autoplay) {
     currentSong.play().catch((e) => console.log("Playback error:", e));
     document.getElementById("play").src = "./img/pause.svg";
@@ -121,7 +118,6 @@ function renderSongList() {
     // Click to play this song
     songUL.querySelectorAll("li")[index].addEventListener("click", () => {
       currentIndex = index;
-      isSpecialSong = false;
       playMusic(songs[currentIndex]);
     });
   });
@@ -152,7 +148,6 @@ function main() {
   document.getElementById("previous").addEventListener("click", () => {
     if (songs.length === 0) return;
     currentIndex = (currentIndex - 1 + songs.length) % songs.length;
-    isSpecialSong = false;
     playMusic(songs[currentIndex]);
   });
 
@@ -160,7 +155,6 @@ function main() {
   document.getElementById("next").addEventListener("click", () => {
     if (songs.length === 0) return;
     currentIndex = (currentIndex + 1) % songs.length;
-    isSpecialSong = false;
     playMusic(songs[currentIndex]);
   });
 
@@ -174,23 +168,11 @@ function main() {
       (currentSong.currentTime / duration) * 100 + "%";
   });
 
-  // 🔁 Autoplay next song or revert if special song ends
+  // 🔁 Autoplay next song when current song ends
   currentSong.addEventListener("ended", () => {
-    if (isSpecialSong) {
-      // return to previously playing song
-      isSpecialSong = false;
-      if (lastPlayed.folder && lastPlayed.song) {
-        currFolder = lastPlayed.folder;
-        songs = playlists[currFolder];
-        currentIndex = lastPlayed.index;
-        playMusic(lastPlayed.song);
-      }
-    } else {
-      // normal autoplay
-      if (songs.length === 0) return;
-      currentIndex = (currentIndex + 1) % songs.length;
-      playMusic(songs[currentIndex]);
-    }
+    if (songs.length === 0) return;
+    currentIndex = (currentIndex + 1) % songs.length; // loop back to first song
+    playMusic(songs[currentIndex]);
   });
 
   // 🎚 Seekbar
@@ -228,24 +210,11 @@ function main() {
     document.querySelector(".left").style.left = "-120%";
   });
 
-  // 🎵 "Click me :)" button logic
   document.querySelector(".loginbtn").addEventListener("click", (e) => {
     e.preventDefault();
-
-    // save current song info before switching
-    if (songs.length > 0) {
-      lastPlayed = {
-        folder: currFolder,
-        index: currentIndex,
-        song: songs[currentIndex],
-      };
-    }
-
-    // play special song
     currFolder = "favs";
     const songToPlay = "ronthon - Shayan.mp3";
     currentIndex = playlists[currFolder].indexOf(songToPlay);
-    isSpecialSong = true;
     playMusic(songToPlay);
   });
 }
