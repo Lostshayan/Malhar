@@ -3,7 +3,7 @@ console.log("This is my first project");
 let currentSong = new Audio();
 let songs = [];
 let currentIndex = 0;
-let currFolder = "";
+let currFolder = "favs"; // default playlist folder
 
 // ----------------------
 // 🎧 Playlists
@@ -49,7 +49,7 @@ function playMusic(track, autoplay = true) {
   let cleanName = track.replace(".mp3", "");
   document.querySelector(".songinfo").innerHTML = cleanName;
   if (autoplay) {
-    currentSong.play();
+    currentSong.play().catch(e => console.log("Playback error:", e));
     document.getElementById("play").src = "./img/pause.svg";
   } else {
     document.getElementById("play").src = "./img/play.svg";
@@ -73,7 +73,7 @@ function displayAlbums() {
               stroke-linejoin="round" />
           </svg>
         </div>
-        <img src="songs/${folder}/cover.jpg" alt="">
+        <img src="songs/${folder}/cover.jpg" alt="Cover" onerror="this.src='img/default-cover.jpg'">
         <h2>${folder.charAt(0).toUpperCase() + folder.slice(1)} Playlist</h2>
         <p>${playlists[folder].length} Songs</p>
       </div>`;
@@ -84,11 +84,9 @@ function displayAlbums() {
     card.addEventListener("click", (e) => {
       currFolder = e.currentTarget.dataset.folder;
       songs = playlists[currFolder];
-      if (songs.length > 0) {
-        currentIndex = 0;
-        playMusic(songs[currentIndex], false);
-        renderSongList();
-      }
+      currentIndex = 0;
+      playMusic(songs[currentIndex], false);
+      renderSongList();
     });
   });
 }
@@ -100,7 +98,7 @@ function renderSongList() {
   const songUL = document.querySelector(".songList ul");
   songUL.innerHTML = "";
 
-  songs.forEach(song => {
+  songs.forEach((song, index) => {
     let parts = song.replace(".mp3", "").split(" - ");
     let songTitle = parts[0];
     let artistName = parts[1] ? parts[1] : "";
@@ -117,11 +115,9 @@ function renderSongList() {
           <img class="invert" src="img/play.svg" alt="">
         </div>
       </li>`;
-  });
 
-  // Click to play a song
-  Array.from(songUL.getElementsByTagName("li")).forEach((li, index) => {
-    li.addEventListener("click", () => {
+    // Click to play this song
+    songUL.querySelectorAll("li")[index].addEventListener("click", () => {
       currentIndex = index;
       playMusic(songs[currentIndex]);
     });
@@ -132,8 +128,6 @@ function renderSongList() {
 // 🚀 Main Function
 // ----------------------
 function main() {
-  // Default playlist
-  currFolder = "favs";
   songs = playlists[currFolder];
   currentIndex = 0;
   playMusic(songs[currentIndex], false);
