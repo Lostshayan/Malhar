@@ -45,8 +45,8 @@ function secondsToMinutesSeconds(seconds) {
 // 🟢 Load and optionally play a song
 // ----------------------
 function playMusic(track, autoplay = true) {
-  currentSong.src = track.includes("/") ? track : `songs/${track}`;
-  let cleanName = decodeURI(track.split("/").pop().replace(".mp3", ""));
+  currentSong.src = `songs/${currFolder}/${track}`;
+  let cleanName = track.replace(".mp3", "");
   document.querySelector(".songinfo").innerHTML = cleanName;
   if (autoplay) {
     currentSong.play();
@@ -82,12 +82,48 @@ function displayAlbums() {
   // 🖱 Click on a playlist card to load songs
   Array.from(document.getElementsByClassName("card")).forEach((card) => {
     card.addEventListener("click", (e) => {
-      const folder = e.currentTarget.dataset.folder;
-      songs = playlists[folder] || [];
+      currFolder = e.currentTarget.dataset.folder;
+      songs = playlists[currFolder];
       if (songs.length > 0) {
         currentIndex = 0;
-        playMusic(`songs/${folder}/${songs[currentIndex]}`, false);
+        playMusic(songs[currentIndex], false);
+        renderSongList();
       }
+    });
+  });
+}
+
+// ----------------------
+// 🎶 Render songs in the song list
+// ----------------------
+function renderSongList() {
+  const songUL = document.querySelector(".songList ul");
+  songUL.innerHTML = "";
+
+  songs.forEach(song => {
+    let parts = song.replace(".mp3", "").split(" - ");
+    let songTitle = parts[0];
+    let artistName = parts[1] ? parts[1] : "";
+
+    songUL.innerHTML += `
+      <li>
+        <img class="invert" width="34" src="img/music.svg" alt="">
+        <div class="info">
+          <div>${songTitle}</div>
+          <div style="font-size: 12px; color: #ccc;">${artistName}</div>
+        </div>
+        <div class="playnow">
+          <span>Play Now</span>
+          <img class="invert" src="img/play.svg" alt="">
+        </div>
+      </li>`;
+  });
+
+  // Click to play a song
+  Array.from(songUL.getElementsByTagName("li")).forEach((li, index) => {
+    li.addEventListener("click", () => {
+      currentIndex = index;
+      playMusic(songs[currentIndex]);
     });
   });
 }
@@ -96,13 +132,12 @@ function displayAlbums() {
 // 🚀 Main Function
 // ----------------------
 function main() {
-  // Load default playlist
-  songs = playlists["favs"];
-  if (songs.length > 0) {
-    currentIndex = 0;
-    playMusic(`songs/favs/${songs[currentIndex]}`, false);
-  }
-
+  // Default playlist
+  currFolder = "favs";
+  songs = playlists[currFolder];
+  currentIndex = 0;
+  playMusic(songs[currentIndex], false);
+  renderSongList();
   displayAlbums();
 
   // ▶️ Play/Pause toggle
@@ -116,18 +151,18 @@ function main() {
     }
   });
 
-  // ⏮ Previous Song
+  // ⏮ Previous
   document.getElementById("previous").addEventListener("click", () => {
     if (songs.length === 0) return;
     currentIndex = (currentIndex - 1 + songs.length) % songs.length;
-    playMusic(`songs/${currFolder}/${songs[currentIndex]}`);
+    playMusic(songs[currentIndex]);
   });
 
-  // ⏭ Next Song
+  // ⏭ Next
   document.getElementById("next").addEventListener("click", () => {
     if (songs.length === 0) return;
     currentIndex = (currentIndex + 1) % songs.length;
-    playMusic(`songs/${currFolder}/${songs[currentIndex]}`);
+    playMusic(songs[currentIndex]);
   });
 
   // ⏱ Update time & progress
